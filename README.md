@@ -1,6 +1,6 @@
 # Calculadora de IMC - Aplicación de Escritorio
 
-**Universidad Veracruzana** | **Ingeniería de Software**
+**Universidad Veracruzana** | **Ingeniería de Software** |
 **Experiencia Educativa:** Programación para Aplicaciones de Escritorio
 
 ---
