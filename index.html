@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de IMC</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f9;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        #resultado {
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Calculadora de IMC</h1>
+
+        <div class="form-group">
+            <label for="peso">Peso (kg):</label>
+            <input type="number" id="peso" step="0.1" placeholder="Ej. 70.5">
+        </div>
+
+        <div class="form-group">
+            <label for="altura">Altura (m):</label>
+            <input type="number" id="altura" step="0.01" placeholder="Ej. 1.75">
+        </div>
+
+        <button id="calcularBtn">Calcular y Guardar</button>
+        <div id="resultado"></div>
+
+        <h2>Historial</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Peso (kg)</th>
+                    <th>Altura (m)</th>
+                    <th>IMC</th>
+                </tr>
+            </thead>
+            <tbody id="historialBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        //Aquí se carg el historial al iniciar
+        window.onload = async () => {
+            const history = await window.api.getHistory();
+            renderHistory(history);
+        };
+
+        document.getElementById('calcularBtn').addEventListener('click', async () => {
+            const peso = parseFloat(document.getElementById('peso').value);
+            const altura = parseFloat(document.getElementById('altura').value);
+
+            if (!peso || !altura || peso <= 0 || altura <= 0) {
+                alert("Por favor ingresa datos válidos.");
+                return;
+            }
+
+            //Aquí se calculaa el IMC
+            const imc = (peso / (altura * altura)).toFixed(2);
+            document.getElementById('resultado').innerText = `Tu IMC es: ${imc}`;
+
+            //Crea el registro
+            const record = {
+                fecha: new Date().toLocaleString(),
+                peso: peso,
+                altura: altura,
+                imc: imc
+            };
+
+            //Se guarda a través del proceso principal y actualizar tabla
+            const updatedHistory = await window.api.saveIMC(record);
+            renderHistory(updatedHistory);
+
+            //Limpiar inputs
+            document.getElementById('peso').value = '';
+            document.getElementById('altura').value = '';
+        });
+
+        function renderHistory(history) {
+            const tbody = document.getElementById('historialBody');
+            tbody.innerHTML = '';
+            //Acá le pongo para mostrar los más recientes primero
+            history.slice().reverse().forEach(record => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${record.fecha}</td>
+                    <td>${record.peso}</td>
+                    <td>${record.altura}</td>
+                    <td><strong>${record.imc}</strong></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+
+</html>
